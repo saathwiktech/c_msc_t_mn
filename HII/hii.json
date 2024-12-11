@@ -1,0 +1,26 @@
+{
+    "_id":"12354",
+    "default":{
+        "SFT":0,
+        "CFT":0
+    },
+    "details":[
+        {
+        "id":"784648363",
+        "length":0,
+        "breadth":0,
+        "depth":0,
+        "number":1,
+        "quantity":0
+        },
+        {
+        "id":"784648364",
+        "length":34,
+        "breadth":40,
+        "depth":0,
+        "number":1,
+        "quantity":0
+        }
+],
+    "wid":"ObjectId('877873483873457')"
+}
