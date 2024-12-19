@@ -7,7 +7,8 @@ require('dotenv').config();
 const excellformat = async (req, res) => {
     try {
         const { wid } = req.params;
-        const work = await Work.findById({ _id: wid });
+        const work = await Work.findById({ _id:wid });
+        // console.log(work);
         const pid = work.pid;
         const projeccct = await Project.findById({ _id: pid });
         
@@ -20,24 +21,15 @@ const excellformat = async (req, res) => {
         };
 
         // Send the request to another server
-        // console.log(payload);
-        // const response = await fetch('http://localhost:11000/prxpdf', {
-        //     method: 'POST',
-        //     headers: {
-        //         'Content-Type': 'application/json',
-        //     },
-        //     body: JSON.stringify(payload)
-        // });
-        console.log("Request sent from the main server ");
-        console.log("Request sent from the main server ",process.env.PDF_URL);
-        const response = await fetch(`${process.env.PDF_URL}/prxpdf`, {
+        console.log(JSON.stringify(payload));
+        const response = await fetch(process.env.PDF_URL, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify(payload)
         });
-        console.log("Recieved",response);
+        // console.log(JSON.stringify(payload))
         if (!response.ok) {
             throw new Error('Failed to fetch PDF');
         }
@@ -47,12 +39,6 @@ const excellformat = async (req, res) => {
         res.setHeader('Content-Type', 'application/pdf');
         res.setHeader('Content-Disposition', 'attachment; filename="invoice.pdf"');
         res.status(200).send(Buffer.from(pdfBuffer));
-        // Wait for the response and parse it as JSON
-        // const result = await response.json();
-        // console.log(result);
-
-        // // Send a response back to the client
-        // res.status(200).json({ message: "Excel generated" });
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: "An error occurred" });
