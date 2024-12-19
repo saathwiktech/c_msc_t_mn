@@ -21,7 +21,7 @@ const excellformat = async (req, res) => {
         };
 
         // Send the request to another server
-        console.log(JSON.stringify(payload));
+        //console.log(JSON.stringify(payload));
         const response = await fetch(process.env.PDF_URL, {
             method: 'POST',
             headers: {
