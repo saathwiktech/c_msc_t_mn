@@ -1,6 +1,6 @@
 const router= require('express').Router();
 const {AddUser,LoginUser,AddProject,AddWork,updateReduction,AddSubwork,deleteSubworkreduction,updateSubworkReduction,GetSubWorksDetailed,GenPdf,deleteWork,deleteSubWork,deleteProject,updateSubworkUnits,deleteSubwork,updateSubworkDetail,updateSubwork,GetWorks,GetSubWorks,GetProjects,addOrUpdateFields,getDefaultValues}=require('../controllers/controller');
-const {excellformat}=require('../controllers/pdf');
+const {excellformat,downloadsubworkPdf}=require('../controllers/pdf');
 const authenticateToken = require('../middleware/AuthMiddleware');
 
 router.get('/',(req,res)=>{
@@ -45,6 +45,7 @@ router.get('/getDefault/:userId',authenticateToken,getDefaultValues);
 
 // Pdf generation
 router.get('/pdf-generate/:wid',authenticateToken,GenPdf);
+router.get('/subwork-pdf-generate/:swid',authenticateToken,downloadsubworkPdf);
 router.get('/xcel-generate/:wid',authenticateToken,excellformat);
 
 

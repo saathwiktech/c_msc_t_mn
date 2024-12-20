@@ -22,7 +22,7 @@ const excellformat = async (req, res) => {
 
         // Send the request to another server
         //console.log(JSON.stringify(payload));
-        const response = await fetch(process.env.PDF_URL, {
+        const response = await fetch(`${process.env.PDF_URL}/generate-pdf`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -45,4 +45,55 @@ const excellformat = async (req, res) => {
     }
 };
 
-module.exports = {excellformat};
+const downloadsubworkPdf = async (req, res) => {
+    try {
+        const { swid } = req.params;
+
+        if (!swid) {
+            return res.status(400).json({ message: "Subwork ID is required" });
+        }
+
+        const subwork = await Subwork.findById(swid);
+        if (!subwork) {
+            return res.status(404).json({ message: "Subwork not found" });
+        }
+
+        const work = await Work.findById(subwork.wid).select('pid name ');
+        if (!work) {
+            return res.status(404).json({ message: "Work not found" });
+        }
+        // console.log(work)
+        const project = await Project.findById(work.pid).select("name clientDetails.clientname");
+        if (!project) {
+            return res.status(404).json({ message: "Project not found" });
+        }
+        let payload = {
+            project: project.name,
+            clientName: project.clientDetails.clientname,
+            work: work.name,
+            subworks: subwork
+        };
+        const response = await fetch(`${process.env.PDF_URL}/generate-pdf-subwork`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(payload)
+        });
+        // console.log(JSON.stringify(payload))
+        if (!response.ok) {
+            throw new Error('Failed to fetch PDF');
+        }
+        const pdfBuffer = await response.arrayBuffer();
+
+        // Set headers to forward PDF to the client
+        res.setHeader('Content-Type', 'application/pdf');
+        res.setHeader('Content-Disposition', 'attachment; filename="invoice.pdf"');
+        res.status(200).send(Buffer.from(pdfBuffer));
+
+    } catch (error) {
+        console.error("Error in downloadsubworkPdf:", error);
+        res.status(500).json({ message: "An error occurred" });
+    }
+};
+module.exports = {excellformat,downloadsubworkPdf};
