@@ -96,4 +96,58 @@ const downloadsubworkPdf = async (req, res) => {
         res.status(500).json({ message: "An error occurred" });
     }
 };
-module.exports = {excellformat,downloadsubworkPdf};
+const downloadsubworkXcell = async (req, res) => {
+    try {
+        const { swid } = req.params;
+
+        if (!swid) {
+            return res.status(400).json({ message: "Subwork ID is required" });
+        }
+
+        const subwork = await Subwork.findById(swid);
+        if (!subwork) {
+            return res.status(404).json({ message: "Subwork not found" });
+        }
+
+        const work = await Work.findById(subwork.wid).select('pid name');
+        if (!work) {
+            return res.status(404).json({ message: "Work not found" });
+        }
+
+        const project = await Project.findById(work.pid).select("name clientDetails.clientname");
+        if (!project) {
+            return res.status(404).json({ message: "Project not found" });
+        }
+
+        let payload = {
+            project: project.name,
+            clientName: project.clientDetails.clientname,
+            work: work.name,
+            subworks: subwork,
+        };
+
+        const response = await fetch(`${process.env.PDF_URL}/generate-xlsx-subwork`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(payload),
+        });
+
+        if (!response.ok) {
+            throw new Error('Failed to fetch Excel');
+        }
+
+        const excelBuffer = await response.arrayBuffer();
+
+        // Set headers to forward Excel to the client
+        res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        res.setHeader('Content-Disposition', 'attachment; filename="subwork_report.xlsx"');
+        res.status(200).send(Buffer.from(excelBuffer));
+    } catch (error) {
+        console.error("Error in downloadsubworkXcell:", error);
+        res.status(500).json({ message: "An error occurred" });
+    }
+};
+
+module.exports = {excellformat,downloadsubworkPdf,downloadsubworkXcell};
