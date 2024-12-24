@@ -8,7 +8,7 @@ const bcrypt = require('bcrypt');
 const { initializeWork } = require('../defaultfunctions/work.default');
 const { initializeSubwork } = require('../defaultfunctions/subwork.default');
 const XLSX = require("xlsx");
-const numberToWords = require('../Utils/numbertowords');
+const numberToWords = require('number-to-words');
 const JWT_SECRET = process.env.JWT_SECRET;
 const AddUser = async (req, res) => {
   const { email, password } = req.body;
@@ -277,40 +277,17 @@ const GetWorks = async (req, res) => {
   }
 
 }
-// const GetSubWorks=async(req,res)=>{
-//     const wid = req.params.wid;
-//     try{
 
-//         const subworks = await Subwork.find({ wid:wid }).select('name _id');
-//         if(subworks.length===0){
-//           await initializeSubwork(wid).then(async ()=>{
-//             const subworks = await Subwork.find({ _id:wid }).select('name _id');
-//             return res.status(404).json({ message: 'SubWorks fetched successfully',subworks: subworks });
-//           }).catch(er=>{console.log(er)})
-//         }
-
-//             res.status(200).json({ message: 'SubWorks fetched successfully', subworks: subworks });
-
-//     }catch(err){
-//         console.error(err);
-//         res.status(500).json({ message: 'Failed to fetch Works', details: err.message });
-//     }
-
-// }
 const GetSubWorks = async (req, res) => {
   const wid = req.params.wid;
   try {
-    // Try fetching subworks
     let subworks = await Subwork.find({ wid: wid }).select('name _id');
 
     if (subworks.length === 0) {
-      // Initialize subworks if none are found
       await initializeSubwork(wid);
       subworks = await Subwork.find({ wid: wid }).select('name _id');
       return res.status(200).json({ message: 'SubWorks fetched successfully', subworks });
     }
-
-    // If subworks are found, respond with them
     return res.status(200).json({ message: 'SubWorks fetched successfully', subworks });
   } catch (err) {
     console.error(err);
@@ -332,7 +309,6 @@ const initializeDefaultFields = async (userId) => {
     await newFields.save();
   }
 };
-// Get default values for a user
 const getDefaultValues = async (req, res) => {
   const { userId } = req.params;
 
@@ -343,10 +319,9 @@ const getDefaultValues = async (req, res) => {
   try {
     let userFields = await UserFields.find({ userId });
 
-    // If no fields exist, initialize with default values
     if (!userFields) {
-      await initializeDefaultFields(userId); // This will create default fields
-      userFields = await UserFields.findOne({ userId }); // Fetch the newly created fields
+      await initializeDefaultFields(userId); 
+      userFields = await UserFields.findOne({ userId }); 
     }
 
     res.status(200).json({ message: "Fields retrieved successfully.", data: userFields });
@@ -367,30 +342,24 @@ const addOrUpdateFields = async (req, res) => {
   }
 
   try {
-    // Find the user's document
     const userFields = await UserFields.findOne({ userId });
 
     if (!userFields) {
       return res.status(404).json({ error: "User not found. Add default values first." });
     }
-
-    // Add new fields or update existing fields
     newFields.forEach(({ name, sft = 0, cft = 0 }) => {
       if (!name) {
         throw new Error("Field name is required for each field.");
       }
-
-      // Check if the field already exists
       const existingField = userFields.fields.find((field) => field.name === name);
 
       if (existingField) {
-        // Update existing field values
+
         existingField.units = [
           { name: "SFT", value: sft },
           { name: "CFT", value: cft },
         ];
       } else {
-        // Add new field with custom or default units
         userFields.fields.push({
           name,
           units: [
@@ -400,8 +369,6 @@ const addOrUpdateFields = async (req, res) => {
         });
       }
     });
-
-    // Save the updated document
     await userFields.save();
 
     res.status(200).json({
@@ -418,7 +385,6 @@ const GetSubWorksDetailed = async (req, res) => {
   try {
 
     const subworks = await Subwork.find({ _id: wid });
-    // console.log(subworks)
     if (!subworks) {
       return res.status(404).json({ message: 'No SubWorks' });
     }
@@ -641,7 +607,7 @@ const GenPdf = async (req, res) => {
 
       // heading for subwork
       rows.push(
-        { Section: subwork.name, Name: "", Number: "", Length: "", Breadth: "", Depth: "", Quantity: "",Total:"" }
+        { Section: subwork.name, Name: "", Number: "", Length: "", Breadth: "", Depth: "", Quantity: "", Unit: "",Total:"" }
       );
       let trackdetailsamount = 0;
       let trackreductionamount = 0;
@@ -680,11 +646,11 @@ const GenPdf = async (req, res) => {
       });
       trackdetailsamount = (sum * mul);
       rows.push(
-        { Section: "", Name: "", Number: "", Length: "", Breadth: "", Depth: "", Quantity: `${new Intl.NumberFormat('en-IN').format(sum)}`, unit: `${mul + "₹ /" + defname}`, Total: `₹${new Intl.NumberFormat('en-IN').format(sum * mul)}` }
+        { Section: "", Name: "", Number: "", Length: "", Breadth: "", Depth: "", Quantity: `${new Intl.NumberFormat('en-IN').format(sum)}`, Unit: `${mul + "₹ /" + defname}`, Total: `₹${new Intl.NumberFormat('en-IN').format(sum * mul)}` }
       );
       dsum += (sum * mul);
       rows.push(
-        { Section: "Deductions", Name: "", Number: "", Length: "", Breadth: "", Depth: "", Quantity: "", Total: "" }
+        { Section: "Deductions", Name: "", Number: "", Length: "", Breadth: "", Depth: "", Quantity: "", Unit: "", Total: "" }
       );
 
       // loop for reductions
@@ -722,7 +688,7 @@ const GenPdf = async (req, res) => {
 
       trackreductionamount = (rrsum * mul);
       rows.push(
-        { Section: "", Name: "", Number: "", Length: "", Breadth: "", Depth: "", Quantity: `${new Intl.NumberFormat('en-IN').format(rrsum)}`, unit: `${mul + "₹ /" + defname}`, Total: `₹${new Intl.NumberFormat('en-IN').format(rrsum * mul)}` }
+        { Section: "", Name: "", Number: "", Length: "", Breadth: "", Depth: "", Quantity: `${new Intl.NumberFormat('en-IN').format(rrsum)}`, Unit: `${mul + "₹ /" + defname}`, Total: `₹${new Intl.NumberFormat('en-IN').format(rrsum * mul)}` }
       );
       rsum += (rrsum * mul);
 
@@ -730,40 +696,42 @@ const GenPdf = async (req, res) => {
       //   { Section: "", Name: "", Number: "", Length: "", Breadth: "", Depth: "", Quantity: "", Total: `${new Intl.NumberFormat('en-IN').format(rsum)}` }
       // );
       rows.push(
-        { Section: "", Name: "", Number: "", Length: "", Breadth: "", Depth: "", Quantity: "", Total: `` }
+        { Section: "", Name: "", Number: "", Length: "", Breadth: "", Depth: "", Quantity: "", Unit: "", Total: `` }
       );
       rows.push(
-        { Section: "", Name: "", Number: "", Length: "", Breadth: "", Depth: "", Quantity: `${subwork.name} =`,unit:"", Total: `₹${new Intl.NumberFormat('en-IN').format(trackdetailsamount - trackreductionamount)}` }
+        { Section: "", Name: "", Number: "", Length: "", Breadth: "", Depth: "", Quantity: `${subwork.name} =`,Unit:"", Total: `₹${new Intl.NumberFormat('en-IN').format(trackdetailsamount - trackreductionamount)}` }
       );
       rows.push(
-        { Section: "", Name: "", Number: "", Length: "", Breadth: "", Depth: "", Quantity: "",unit:"", Total: "" }
+        { Section: "", Name: "", Number: "", Length: "", Breadth: "", Depth: "", Quantity: "",Unit:"", Total: "" }
       );
       rows.push(
-        { Section: "", Name: "", Number: "", Length: "", Breadth: "", Depth: "", Quantity: "",unit:"", Total: "" }
+        { Section: "", Name: "", Number: "", Length: "", Breadth: "", Depth: "", Quantity: "",Unit:"", Total: "" }
       );
       totalsum += trackdetailsamount - trackreductionamount;
     });
 
     rows.push(
-      { Section: "", Name: "", Number: "", Length: "", Breadth: "", Depth: "", Quantity: "", Total: "" }
+      { Section: "", Name: "", Number: "", Length: "", Breadth: "", Depth: "", Quantity: "", Unit: "", Total: "" }
     );
     rows.push(
-      { Section: "", Name: "", Number: "", Length: "", Breadth: "", Depth: "", Quantity: "", Total: "" }
+      { Section: "", Name: "", Number: "", Length: "", Breadth: "", Depth: "", Quantity: "", Unit: "", Total: "" }
     );
 
     // Grand total
     rows.push(
-      { Section: "", Name: "", Number: "", Length: "", Breadth: "", Depth: "", Quantity: "Grand total", Total: `₹ ${new Intl.NumberFormat('en-IN').format(totalsum)}` }
+      { Section: "", Name: "", Number: "", Length: "", Breadth: "", Depth: "", Quantity: "Grand total", Unit: "", Total: `₹ ${new Intl.NumberFormat('en-IN').format(totalsum)}` }
     );
-    let numberwords = numberToWords(totalsum);
+    // let numberwords = numberToWords(totalsum);numberToWords.toWords(totalsum)
+    let numberwords = numberToWords.toWords(totalsum);
+    // console.log(numberToWords.toWords(123456789011))
     rows.push(
-      { Section: `Project Name: ${projeccct.name}`, Name: "", Number: "", Length: "", Breadth: "", Depth: "", Quantity: "", Total: `` }
+      { Section: `Project Name: ${projeccct.name}`, Name: "", Number: "", Length: "", Breadth: "", Depth: "", Quantity: "", Unit: "", Total: `` }
     );
     rows.push(
-      { Section: `Client : ${projeccct.clientDetails.clientname}`, Name: "", Number: "", Length: "", Breadth: "", Depth: "", Quantity: "", Total: `` }
+      { Section: `Client : ${projeccct.clientDetails.clientname}`, Name: "", Number: "", Length: "", Breadth: "", Depth: "", Quantity: "", Unit: "", Total: `` }
     );
     rows.push(
-      { Section: `Client : ${projeccct.clientDetails.clientnumber}`, Name: "", Number: "", Length: "", Breadth: "", Depth: "", Quantity: "", Total: `${numberwords}` }
+      { Section: `Client : ${projeccct.clientDetails.clientnumber}`, Name: "", Number: "", Length: "", Breadth: "", Depth: "", Quantity: "", Unit: "", Total: `${numberwords}` }
     );
 
     // Create a new workbook and add the data
