@@ -43,8 +43,4 @@ function numberToWords(number) {
     return words.trim() + " Rupees";
 }
 
-// // Example usage:
-// const amount = 1234567;
-// const amountInWords = numberToWords(amount);
-// console.log(amountInWords);
 module.exports = numberToWords;

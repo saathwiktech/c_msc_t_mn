@@ -205,7 +205,6 @@ const GetProjects = async (req, res) => {
 const deleteSubwork = async (req, res) => {
 
   const { swid, detailId } = req.params;
-  // console.log("swid",swid,"DetailId",detailId)
   try {
     // Use $pull to remove the subdocument from the `details` array
     const updatedSubwork = await Subwork.findByIdAndUpdate(
@@ -230,7 +229,6 @@ const deleteSubwork = async (req, res) => {
 const deleteSubworkreduction = async (req, res) => {
 
   const { swid, detailId } = req.params;
-  // console.log("swid",swid,"DetailId",detailId)
   try {
     // Use $pull to remove the subdocument from the `details` array
     const updatedSubwork = await Subwork.findByIdAndUpdate(
@@ -258,10 +256,10 @@ const GetWorks = async (req, res) => {
   try {
 
     const works = await Work.find({ pid: pid }).select('name _id');
-    // console.log('fetched works',works)
+    
     if (works.length === 0) {
       await initializeWork(pid).then(async (e) => {
-        // console.log("inside initialization")
+        
         const works = await Work.find({ pid: pid }).select('name _id');
         return res.status(200).json({ message: 'Works fetched successfully', works: works });
       })
@@ -721,9 +719,7 @@ const GenPdf = async (req, res) => {
     rows.push(
       { Section: "", Name: "", Number: "", Length: "", Breadth: "", Depth: "", Quantity: "Grand total", Unit: "", Total: `₹ ${new Intl.NumberFormat('en-IN').format(totalsum)}` }
     );
-    // let numberwords = numberToWords(totalsum);numberToWords.toWords(totalsum)
     let numberwords = numberToWords.toWords(totalsum);
-    // console.log(numberToWords.toWords(123456789011))
     rows.push(
       { Section: `Project Name: ${projeccct.name}`, Name: "", Number: "", Length: "", Breadth: "", Depth: "", Quantity: "", Unit: "", Total: `` }
     );
@@ -771,7 +767,6 @@ const GenPdf = async (req, res) => {
 const updateReduction = async (req, res) => {
   const { swid } = req.params;
   const { newDetails } = req.body;
-  console.log(newDetails)
   try {
     const subwork = await Subwork.findById(swid);
 
