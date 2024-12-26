@@ -644,7 +644,7 @@ const GenPdf = async (req, res) => {
       });
       trackdetailsamount = (sum * mul);
       rows.push(
-        { Section: "", Name: "", Number: "", Length: "", Breadth: "", Depth: "", Quantity: `${new Intl.NumberFormat('en-IN').format(sum)}`, Unit: `${mul + "₹ /" + defname}`, Total: `` } //₹${new Intl.NumberFormat('en-IN').format(sum * mul)}
+        { Section: "", Name: "", Number: "", Length: "", Breadth: "", Depth: "", Quantity: `${new Intl.NumberFormat('en-IN').format(sum)+" "+defname} `, Unit: ``, Total: `` } //${mul + "₹ /" + defname}//₹${new Intl.NumberFormat('en-IN').format(sum * mul)}
       );
       dsum += (sum * mul);
       rows.push(
@@ -686,7 +686,7 @@ const GenPdf = async (req, res) => {
 
       trackreductionamount = (rrsum * mul);
       rows.push(
-        { Section: "", Name: "", Number: "", Length: "", Breadth: "", Depth: "", Quantity: `${new Intl.NumberFormat('en-IN').format(rrsum)}`, Unit: `${mul + "₹ /" + defname}`, Total: `` } //₹${new Intl.NumberFormat('en-IN').format(rrsum * mul)}
+        { Section: "", Name: "", Number: "", Length: "", Breadth: "", Depth: "", Quantity: `${new Intl.NumberFormat('en-IN').format(rrsum)+" "+defname}`, Unit: ``, Total: `` } //${mul + "₹ /" + defname} //₹${new Intl.NumberFormat('en-IN').format(rrsum * mul)}
       );
       rsum += (rrsum * mul);
 
@@ -697,7 +697,7 @@ const GenPdf = async (req, res) => {
         { Section: "", Name: "", Number: "", Length: "", Breadth: "", Depth: "", Quantity: "", Unit: "", Total: `` }
       );
       rows.push(
-        { Section: "", Name: "", Number: "", Length: "", Breadth: "", Depth: `${subwork.name} `, Quantity: `${new Intl.NumberFormat('en-IN').format(sum-rrsum)} `,Unit:`${mul + "₹ /" + defname}`, Total: `₹ ${new Intl.NumberFormat('en-IN').format((sum-rrsum)*mul)} ` }
+        { Section: "", Name: "", Number: "", Length: "", Breadth: "", Depth: `Total`, Quantity: `${new Intl.NumberFormat('en-IN').format(sum-rrsum)} `,Unit:`${mul + "₹ /" + defname}`, Total: `₹ ${new Intl.NumberFormat('en-IN').format((sum-rrsum)*mul)} ` }
       );
       // rows.push(
       //   { Section: "", Name: "", Number: "", Length: "", Breadth: "", Depth: "", Quantity: `${subwork.name} =`,Unit:"", Total: `₹${new Intl.NumberFormat('en-IN').format(trackdetailsamount - trackreductionamount)}` }
